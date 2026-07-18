@@ -1,0 +1,24 @@
+# Render Blueprint — single web service: Express serves the API *and* the
+# React build, so the app is one origin and the auth cookie is first-party.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: pantrack
+    runtime: node
+    plan: free
+    rootDir: server
+    # Build server, run migrations, then build the client into ../client/dist
+    # (which the server serves via express.static at ../../client/dist).
+    buildCommand: npm install && npm run build && npx prisma generate && npx prisma migrate deploy && cd ../client && npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # Secrets — set these in the Render dashboard, not in the repo.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
