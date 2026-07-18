@@ -7,9 +7,10 @@ services:
     runtime: node
     plan: free
     rootDir: server
-    # Build server, run migrations, then build the client into ../client/dist
-    # (which the server serves via express.static at ../../client/dist).
-    buildCommand: npm install && npm run build && npx prisma generate && npx prisma migrate deploy && cd ../client && npm install && npm run build
+    # Build server, run migrations, then build the client into server/public
+    # (served by Express at ../public). --include=dev forces devDependencies
+    # (@types, typescript, vite...) since NODE_ENV=production otherwise skips them.
+    buildCommand: npm install --include=dev && npm run build && npx prisma generate && npx prisma migrate deploy && cd ../client && npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
