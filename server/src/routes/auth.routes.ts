@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { register, login, logout, me, updateOnboarding, registerSchema, loginSchema } from "../controllers/auth.controller";
+import {
+  register, login, logout, me, updateOnboarding, updateProfile, changePassword,
+  registerSchema, loginSchema, updateProfileSchema, changePasswordSchema,
+} from "../controllers/auth.controller";
 import { validate } from "../middleware/validate";
 import { authenticate } from "../middleware/auth";
 import { z } from "zod";
@@ -23,5 +26,7 @@ router.patch(
   ),
   updateOnboarding
 );
+router.patch("/profile", authenticate, validate(updateProfileSchema), updateProfile);
+router.post("/change-password", authenticate, validate(changePasswordSchema), changePassword);
 
 export default router;

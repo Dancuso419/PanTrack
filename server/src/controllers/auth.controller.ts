@@ -155,3 +155,51 @@ export async function updateOnboarding(req: Request, res: Response, next: NextFu
     next(err);
   }
 }
+
+export const updateProfileSchema = z.object({
+  fullName: z.string().min(1, "Full name is required").optional(),
+  profileType: z.string().optional(),
+  currency: z.enum(["NGN", "USD", "EUR", "GBP"]).optional(),
+});
+
+export async function updateProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authReq = req as AuthRequest;
+    const { fullName, profileType, currency } = req.body;
+
+    const user = await prisma.user.update({
+      where: { id: authReq.userId },
+      data: {
+        ...(fullName !== undefined && { fullName }),
+        ...(profileType !== undefined && { profileType }),
+        ...(currency !== undefined && { currency }),
+      },
+      select: {
+        id: true, fullName: true, email: true, currency: true,
+        monthlyIncome: true, monthlyBudget: true, profileType: true, onboarded: true, createdAt: true,
+      },
+    });
+
+    sendSuccess(res, user, "Profile updated.");
+  } catch (err) {
+    next(err);
+  }
+}
+
+export const changePasswordSchema = z.object({
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export async function changePassword(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authReq = req as AuthRequest;
+    const { newPassword } = req.body;
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({ where: { id: authReq.userId }, data: { password: hashed } });
+
+    sendSuccess(res, null, "Password changed successfully.");
+  } catch (err) {
+    next(err);
+  }
+}

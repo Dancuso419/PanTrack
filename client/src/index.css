@@ -224,13 +224,13 @@
 .animate-float { animation: float-y 5s ease-in-out infinite; }
 
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes drawer-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
-@keyframes drawer-in-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.drawer-backdrop { animation: fade-in 0.2s ease forwards; }
-.drawer-panel { animation: drawer-in-up 0.32s var(--ease-out-quart) forwards; }
-@media (min-width: 640px) {
-  .drawer-panel { animation: drawer-in-right 0.32s var(--ease-out-quart) forwards; }
-}
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes pop-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
+.backdrop-in { animation: fade-in 0.2s ease forwards; }
+.backdrop-out { animation: fade-out 0.18s ease forwards; }
+.pop-in { animation: pop-in 0.24s var(--ease-out-quart) forwards; }
+.pop-out { animation: pop-out 0.18s var(--ease-out-quart) forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

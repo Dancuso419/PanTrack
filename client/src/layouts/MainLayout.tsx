@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Logo from "../components/Logo";
+import ProfileMenu from "../components/ProfileMenu";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -31,26 +32,24 @@ export default function MainLayout() {
     navigate("/login");
   }
 
-  const initials = (user?.fullName || "U")
-    .split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-
   return (
     // Fixed shell: the shell itself never scrolls — only <main> does.
     <div className="flex h-screen overflow-hidden bg-base">
       {/* Sidebar (desktop) */}
       <aside
-        className={`hidden shrink-0 flex-col p-4 transition-[width] duration-300 ease-out md:flex ${collapsed ? "w-[86px]" : "w-[248px]"}`}
+        className={`relative z-10 hidden shrink-0 flex-col bg-surface p-4 transition-[width] duration-300 ease-out md:flex ${collapsed ? "w-[86px]" : "w-[248px]"}`}
+        style={{ boxShadow: "6px 0 24px -10px oklch(0.55 0.04 285 / 0.22)" }}
       >
         <div className={`mb-2 flex items-center px-1 pb-4 pt-2 ${collapsed ? "justify-center" : "justify-between"}`}>
           {collapsed ? <Logo size={34} withWordmark={false} /> : <Logo size={34} />}
           {!collapsed && (
-            <button onClick={() => setCollapsed(true)} className="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface hover:text-brand" aria-label="Collapse sidebar">
+            <button onClick={() => setCollapsed(true)} className="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-base-2 hover:text-brand" aria-label="Collapse sidebar">
               <PanelLeftClose size={18} />
             </button>
           )}
         </div>
         {collapsed && (
-          <button onClick={() => setCollapsed(false)} className="mb-2 grid h-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface hover:text-brand" aria-label="Expand sidebar">
+          <button onClick={() => setCollapsed(false)} className="mb-2 grid h-9 place-items-center rounded-lg text-muted transition-colors hover:bg-base-2 hover:text-brand" aria-label="Expand sidebar">
             <PanelLeft size={18} />
           </button>
         )}
@@ -63,7 +62,7 @@ export default function MainLayout() {
               title={collapsed ? item.label : undefined}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg py-3 text-sm font-semibold transition-all ${collapsed ? "justify-center px-0" : "px-4"} ${
-                  isActive ? "btn-brand" : "text-ink-2 hover:bg-surface hover:text-ink"
+                  isActive ? "btn-brand" : "text-ink-2 hover:bg-base-2 hover:text-ink"
                 }`
               }
             >
@@ -97,17 +96,7 @@ export default function MainLayout() {
             {new Date().toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}
           </span>
           <div className="ml-auto flex min-w-0 items-center gap-2">
-            <div className="neu-raised flex min-w-0 items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-4" style={{ ["--neu-d" as string]: "4px" }}>
-              <span
-                className="grid size-9 shrink-0 place-items-center rounded-full text-sm font-bold text-white"
-                style={{ background: "linear-gradient(140deg, var(--color-brand), var(--color-brand-strong))" }}
-              >
-                {initials}
-              </span>
-              <span className="hidden max-w-[8rem] truncate text-sm font-semibold text-ink sm:block">
-                {user?.fullName?.split(" ")[0]}
-              </span>
-            </div>
+            <ProfileMenu user={user} onLogout={handleLogout} />
           </div>
         </header>
 

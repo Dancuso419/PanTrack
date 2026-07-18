@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,13 +19,21 @@ export default function TransactionDrawer({ txn, onClose }: { txn: TxnDetail | n
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [form, setForm] = useState({ amount: "", categoryId: "", description: "", date: "" });
+
+  // Play the pop-out animation, then tell the parent to unmount.
+  const requestClose = useCallback(() => {
+    setClosing(true);
+    window.setTimeout(() => { setClosing(false); onClose(); }, 190);
+  }, [onClose]);
 
   // Reset local state whenever a new transaction is opened
   useEffect(() => {
     if (txn) {
       setEditing(false);
       setConfirmDelete(false);
+      setClosing(false);
       setForm({
         amount: String(txn.amount),
         categoryId: txn.categoryId,
@@ -38,10 +46,10 @@ export default function TransactionDrawer({ txn, onClose }: { txn: TxnDetail | n
   // Esc to close
   useEffect(() => {
     if (!txn) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && requestClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [txn, onClose]);
+  }, [txn, requestClose]);
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -68,21 +76,25 @@ export default function TransactionDrawer({ txn, onClose }: { txn: TxnDetail | n
 
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/${base}/${txn!.id}`),
-    onSuccess: () => { invalidateAll(); onClose(); },
+    onSuccess: () => { invalidateAll(); requestClose(); },
   });
 
   if (!txn) return null;
   const income = txn.type === "income";
 
   return createPortal(
-    <div className="fixed inset-0 z-[400] flex justify-end" role="dialog" aria-modal="true" aria-label="Transaction details">
-      <button className="drawer-backdrop absolute inset-0 bg-[oklch(0.3_0.03_285/0.35)]" aria-label="Close" onClick={onClose} />
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Transaction details">
+      <button
+        className={`absolute inset-0 bg-[oklch(0.3_0.03_285/0.35)] ${closing ? "backdrop-out" : "backdrop-in"}`}
+        aria-label="Close"
+        onClick={requestClose}
+      />
 
-      <div className="drawer-panel absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-2xl bg-base p-6 sm:inset-y-0 sm:left-auto sm:right-0 sm:bottom-auto sm:max-h-none sm:w-[27rem] sm:rounded-none sm:rounded-l-2xl sm:p-7">
+      <div className={`relative max-h-[88vh] w-full max-w-md overflow-y-auto rounded-2xl bg-base p-6 shadow-2xl sm:p-7 ${closing ? "pop-out" : "pop-in"}`}>
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-bold text-ink">Transaction details</h2>
-          <button onClick={onClose} className="neu-btn grid size-10 place-items-center rounded-full text-ink-2" aria-label="Close">
+          <button onClick={requestClose} className="neu-btn grid size-10 place-items-center rounded-full text-ink-2" aria-label="Close">
             <X size={18} />
           </button>
         </div>
