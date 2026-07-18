@@ -34,7 +34,7 @@ export default function MainLayout() {
 
   return (
     // Fixed shell: the shell itself never scrolls — only <main> does.
-    <div className="flex h-screen overflow-hidden bg-base">
+    <div className="fixed inset-0 flex overflow-hidden bg-base">
       {/* Sidebar (desktop) */}
       <aside
         className={`relative z-10 hidden shrink-0 flex-col bg-surface p-4 transition-[width] duration-300 ease-out md:flex ${collapsed ? "w-[86px]" : "w-[248px]"}`}
