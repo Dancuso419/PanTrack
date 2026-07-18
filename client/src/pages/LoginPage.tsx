@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import AuthBrandPanel from "../components/AuthBrandPanel";
 import Logo from "../components/Logo";
@@ -73,17 +73,31 @@ export function Field({
   onChange: (v: string) => void;
   placeholder?: string;
 }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === "password";
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm font-semibold text-ink-2">{label}</span>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required
-        className="field w-full rounded-xl px-4 py-3.5 text-sm"
-      />
+      <div className="relative">
+        <input
+          type={isPassword && show ? "text" : type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          className={`field w-full rounded-xl px-4 py-3.5 text-sm ${isPassword ? "pr-12" : ""}`}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            aria-label={show ? "Hide password" : "Show password"}
+            className="absolute inset-y-0 right-0 grid w-12 place-items-center text-muted hover:text-brand"
+          >
+            {show ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
+      </div>
     </label>
   );
 }

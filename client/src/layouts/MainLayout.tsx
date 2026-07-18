@@ -37,8 +37,8 @@ export default function MainLayout() {
     <div className="fixed inset-0 flex overflow-hidden bg-base">
       {/* Sidebar (desktop) */}
       <aside
-        className={`relative z-10 hidden shrink-0 flex-col bg-surface p-4 transition-[width] duration-300 ease-out md:flex ${collapsed ? "w-[86px]" : "w-[248px]"}`}
-        style={{ boxShadow: "6px 0 24px -10px oklch(0.55 0.04 285 / 0.22)" }}
+        className={`relative z-10 m-3 hidden shrink-0 flex-col rounded-2xl bg-surface p-4 transition-[width] duration-300 ease-out md:flex ${collapsed ? "w-[86px]" : "w-[248px]"}`}
+        style={{ boxShadow: "0 10px 34px -14px oklch(0.55 0.04 285 / 0.32)" }}
       >
         <div className={`mb-2 flex items-center px-1 pb-4 pt-2 ${collapsed ? "justify-center" : "justify-between"}`}>
           {collapsed ? <Logo size={34} withWordmark={false} /> : <Logo size={34} />}
