@@ -8,13 +8,12 @@ export function generateToken(userId: string): string {
   });
 }
 
-// ponytail: prod uses cross-site cookies (Vercel frontend + Render backend are
-// different sites), which require SameSite=None; Secure. This drops the
-// SameSite=Strict CSRF shield noted in CLAUDE.md §6 — add token-based CSRF
-// before exposing state-changing routes. Local dev stays Strict.
+// Frontend and API are served from the same origin (Express serves the React
+// build in production), so the auth cookie is first-party: SameSite=Lax keeps
+// the CSRF shield from CLAUDE.md §6 while surviving top-level navigations.
 const cookieOptions = {
   httpOnly: true,
-  sameSite: config.nodeEnv === "production" ? ("none" as const) : ("strict" as const),
+  sameSite: "lax" as const,
   secure: config.nodeEnv === "production",
 };
 

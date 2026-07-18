@@ -1,3 +1,5 @@
+import path from "path";
+import fs from "fs";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -15,7 +17,9 @@ import analyticsRoutes from "./routes/analytics.routes";
 
 const app = express();
 
-app.use(helmet());
+// ponytail: CSP disabled so Helmet doesn't block the served Vite bundle. Fine
+// for MVP; add a tuned CSP (script-src/style-src for the built assets) later.
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -39,6 +43,17 @@ app.use("/api/analytics", analyticsRoutes);
 app.get("/api/health", (_req, res) => {
   res.json({ success: true, message: "PanTrack API is running." });
 });
+
+// Serve the React build from the same origin so the auth cookie is first-party.
+// Guarded by existence so local dev (Vite serves the client) is unaffected.
+const clientDist = path.join(__dirname, "../../client/dist");
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  // SPA fallback: any non-/api route returns index.html (React Router handles it).
+  app.get(/^(?!\/api).*/, (_req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 
 app.use(errorHandler);
 
