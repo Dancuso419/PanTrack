@@ -111,7 +111,7 @@ export default function BudgetPage() {
                       <p className="text-xs text-muted">{new Date(b.year, b.month - 1).toLocaleString("default", { month: "long", year: "numeric" })}</p>
                     </div>
                   </div>
-                  <button onClick={() => deleteMutation.mutate(b.id)} className="grid size-8 place-items-center rounded-md text-muted hover:text-expense" aria-label="Delete"><Trash2 size={15} /></button>
+                  <button onClick={() => deleteMutation.mutate(b.id)} className="grid size-9 place-items-center rounded-md text-muted hover:bg-base-2 hover:text-expense" aria-label="Delete"><Trash2 size={16} /></button>
                 </div>
 
                 <div className="mb-2 flex items-baseline justify-between">

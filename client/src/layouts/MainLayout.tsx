@@ -89,7 +89,10 @@ export default function MainLayout() {
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Top bar — stays fixed; only <main> scrolls */}
-        <header className="flex shrink-0 items-center gap-3 px-5 py-4 md:px-8">
+        <header
+          className="flex shrink-0 items-center gap-3 px-5 py-4 md:px-8"
+          style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
+        >
           <div className="md:hidden"><Logo size={30} withWordmark={false} /></div>
           <span className="neu-inset hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-muted sm:flex" style={{ ["--neu-d" as string]: "2px" }}>
             <CalendarDays size={15} className="text-brand" />
@@ -118,7 +121,10 @@ export default function MainLayout() {
           ))}
         </nav>
 
-        <main className="flex-1 overflow-y-auto px-5 pb-12 pt-2 md:px-8">
+        <main
+          className="flex-1 overflow-y-auto overscroll-contain px-5 pt-2 md:px-8"
+          style={{ paddingBottom: "max(3rem, env(safe-area-inset-bottom))" }}
+        >
           <Outlet />
         </main>
       </div>

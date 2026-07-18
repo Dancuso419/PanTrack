@@ -109,7 +109,7 @@ export default function CategoriesPage() {
                 ) : (
                   <button
                     onClick={() => { if (confirm(`Delete "${cat.name}"?`)) deleteMutation.mutate(cat.id); }}
-                    className="grid size-8 shrink-0 place-items-center rounded-md text-muted opacity-100 transition-opacity hover:text-expense sm:opacity-0 sm:group-hover:opacity-100"
+                    className="grid size-9 shrink-0 place-items-center rounded-md text-muted opacity-100 transition-opacity hover:bg-base-2 hover:text-expense sm:opacity-0 sm:group-hover:opacity-100"
                     aria-label="Delete"
                   >
                     <Trash2 size={15} />

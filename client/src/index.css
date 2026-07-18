@@ -87,6 +87,15 @@
     color: var(--color-ink-2);
     font-family: var(--font-sans);
   }
+  /* No grey tap-flash on touch devices */
+  * { -webkit-tap-highlight-color: transparent; }
+
+  /* Prevent iOS from auto-zooming when a form field < 16px gets focus.
+     !important is required to beat Tailwind's text-sm utility class. */
+  @media (max-width: 639px) {
+    input, select, textarea { font-size: 16px !important; }
+  }
+
   /* Native selects: kill the OS arrow everywhere (custom chevron supplied by <Select/>) */
   select { appearance: none; -webkit-appearance: none; }
   /* Hide number-input spinners for cleaner money fields */
