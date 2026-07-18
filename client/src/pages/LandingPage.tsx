@@ -35,7 +35,7 @@ const REVIEWS = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-base text-ink-2">
+    <div className="min-h-screen bg-base text-ink-2">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[720px] -z-10"
         style={{
@@ -211,14 +211,9 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-white/50">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Logo size={34} />
-            <p className="mt-4 max-w-xs text-sm text-muted">Track Every Penny. Plan Every Future. The calm way to manage your money.</p>
-          </div>
-          <FooterCol title="Product" links={["Features", "How it works", "Reviews"]} />
-          <FooterCol title="Company" links={["About", "Blog", "Careers"]} />
-          <FooterCol title="Legal" links={["Privacy", "Terms", "Security"]} />
+        <div className="mx-auto max-w-6xl px-5 py-14">
+          <Logo size={34} />
+          <p className="mt-4 max-w-xs text-sm text-muted">Track Every Penny. Plan Every Future. The calm way to manage your money.</p>
         </div>
         <div className="border-t border-white/50">
           <p className="mx-auto max-w-6xl px-5 py-6 text-sm text-muted">© {new Date().getFullYear()} PanTrack. All rights reserved.</p>
@@ -233,19 +228,6 @@ function SectionHead({ title, sub }: { title: string; sub: string }) {
     <div className="mx-auto max-w-2xl text-center">
       <h2 className="text-[clamp(1.9rem,4vw,2.75rem)] font-semibold text-ink">{title}</h2>
       <p className="mt-4 text-lg text-ink-2">{sub}</p>
-    </div>
-  );
-}
-
-function FooterCol({ title, links }: { title: string; links: string[] }) {
-  return (
-    <div>
-      <h4 className="text-sm font-bold text-ink">{title}</h4>
-      <ul className="mt-4 space-y-2.5">
-        {links.map((l) => (
-          <li key={l}><a href="#" className="text-sm text-muted transition-colors hover:text-brand">{l}</a></li>
-        ))}
-      </ul>
     </div>
   );
 }
