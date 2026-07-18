@@ -45,8 +45,9 @@ app.get("/api/health", (_req, res) => {
 });
 
 // Serve the React build from the same origin so the auth cookie is first-party.
-// Guarded by existence so local dev (Vite serves the client) is unaffected.
-const clientDist = path.join(__dirname, "../../client/dist");
+// Built into server/public (see client/vite.config.ts). Guarded by existence
+// so local dev (Vite serves the client) is unaffected.
+const clientDist = path.join(__dirname, "../public");
 if (fs.existsSync(clientDist)) {
   app.use(express.static(clientDist));
   // SPA fallback: any non-/api route returns index.html (React Router handles it).
