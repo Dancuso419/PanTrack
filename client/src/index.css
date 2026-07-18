@@ -1,0 +1,242 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Self-hosted fonts (offline-safe — no CDN).
+   Satoshi = UI/body, Clash Display = headings.
+   ============================================================ */
+@font-face { font-family: "Satoshi"; src: url("./assets/fonts/satoshi-400.woff2") format("woff2"); font-weight: 400; font-display: swap; font-style: normal; }
+@font-face { font-family: "Satoshi"; src: url("./assets/fonts/satoshi-500.woff2") format("woff2"); font-weight: 500; font-display: swap; font-style: normal; }
+@font-face { font-family: "Satoshi"; src: url("./assets/fonts/satoshi-700.woff2") format("woff2"); font-weight: 700; font-display: swap; font-style: normal; }
+@font-face { font-family: "Satoshi"; src: url("./assets/fonts/satoshi-900.woff2") format("woff2"); font-weight: 900; font-display: swap; font-style: normal; }
+@font-face { font-family: "Clash Display"; src: url("./assets/fonts/clash-500.woff2") format("woff2"); font-weight: 500; font-display: swap; font-style: normal; }
+@font-face { font-family: "Clash Display"; src: url("./assets/fonts/clash-600.woff2") format("woff2"); font-weight: 600; font-display: swap; font-style: normal; }
+@font-face { font-family: "Clash Display"; src: url("./assets/fonts/clash-700.woff2") format("woff2"); font-weight: 700; font-display: swap; font-style: normal; }
+
+/* ============================================================
+   PanTrack design tokens — soft neumorphic hybrid
+   Palette extracted from "Dash Ref": violet primary, lavender
+   base, semantic income/expense/warning. OKLCH throughout.
+   ============================================================ */
+@theme {
+  /* Surfaces (single-hue lavender so dual neumorphic shadows read) */
+  --color-base: oklch(0.945 0.012 288);   /* page background */
+  --color-base-2: oklch(0.925 0.014 288); /* recessed wells */
+  --color-surface: oklch(0.975 0.006 288);/* raised panels */
+  --color-surface-2: oklch(0.99 0.004 288);/* crisp white cards */
+
+  /* Ink */
+  --color-ink: oklch(0.28 0.035 285);     /* headings */
+  --color-ink-2: oklch(0.44 0.03 285);    /* body */
+  --color-muted: oklch(0.56 0.028 285);   /* secondary / labels (>=4.5:1 on base) */
+  --color-faint: oklch(0.68 0.02 285);    /* placeholders / hints */
+
+  /* Brand violet */
+  --color-brand: oklch(0.56 0.205 285);
+  --color-brand-strong: oklch(0.5 0.215 285);
+  --color-brand-soft: oklch(0.9 0.05 285);
+  --color-brand-tint: oklch(0.955 0.02 285);
+  --color-on-brand: oklch(0.99 0.01 285);
+
+  /* Semantics */
+  --color-income: oklch(0.62 0.13 162);
+  --color-income-soft: oklch(0.94 0.045 162);
+  --color-expense: oklch(0.62 0.2 22);
+  --color-expense-soft: oklch(0.94 0.04 22);
+  --color-warning: oklch(0.72 0.13 72);
+  --color-warning-soft: oklch(0.94 0.05 78);
+
+  /* Neumorphic shadow atoms — softened */
+  --neu-light: oklch(1 0 0 / 0.85);       /* top-left highlight */
+  --neu-dark: oklch(0.74 0.035 285 / 0.32);/* bottom-right shadow */
+  --neu-dark-soft: oklch(0.74 0.035 285 / 0.18);
+
+  /* Radii */
+  --radius-sm: 0.625rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.375rem;
+  --radius-xl: 1.875rem;
+  --radius-full: 999px;
+
+  /* Type */
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-display: "Clash Display", "Satoshi", ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Z-scale */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 600;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  html, body {
+    /* Defensive: decorative blobs / shadows must never create a horizontal scrollbar */
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  body {
+    background-color: var(--color-base);
+    color: var(--color-ink-2);
+    font-family: var(--font-sans);
+  }
+  /* Native selects: kill the OS arrow everywhere (custom chevron supplied by <Select/>) */
+  select { appearance: none; -webkit-appearance: none; }
+  /* Hide number-input spinners for cleaner money fields */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; }
+  h1, h2, h3, h4 {
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-wrap: balance;
+    letter-spacing: -0.005em;
+    word-spacing: 0.08em; /* Clash Display's space glyph is narrow — open word gaps */
+  }
+  p { text-wrap: pretty; }
+
+  /* Visible, on-brand focus for every interactive element */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection { background: var(--color-brand-soft); color: var(--color-ink); }
+}
+
+/* ============================================================
+   Neumorphic surface utilities
+   Raised = extruded panel. Inset = recessed well/input.
+   Shadows scale with a --neu-d (distance) custom property.
+   ============================================================ */
+@layer components {
+  .neu-raised {
+    background: var(--color-surface);
+    box-shadow:
+      calc(var(--neu-d, 6px)) calc(var(--neu-d, 6px)) calc(var(--neu-d, 6px) * 2.4) var(--neu-dark),
+      calc(var(--neu-d, 6px) * -1) calc(var(--neu-d, 6px) * -1) calc(var(--neu-d, 6px) * 2.4) var(--neu-light);
+    transition: box-shadow 0.28s var(--ease-out-quart),
+      transform 0.28s var(--ease-out-quart);
+  }
+  .neu-inset {
+    background: var(--color-base-2);
+    box-shadow:
+      inset calc(var(--neu-d, 5px)) calc(var(--neu-d, 5px)) calc(var(--neu-d, 5px) * 1.8) var(--neu-dark),
+      inset calc(var(--neu-d, 5px) * -1) calc(var(--neu-d, 5px) * -1) calc(var(--neu-d, 5px) * 1.8) var(--neu-light);
+  }
+  /* Cards that respond to hover with a gentle lift */
+  .neu-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      calc(var(--neu-d, 6px) + 3px) calc(var(--neu-d, 6px) + 5px) calc(var(--neu-d, 6px) * 3) var(--neu-dark),
+      calc(var(--neu-d, 6px) * -1) calc(var(--neu-d, 6px) * -1) calc(var(--neu-d, 6px) * 2.4) var(--neu-light);
+  }
+  /* Interactive raised → pressed on active */
+  .neu-btn {
+    background: var(--color-surface);
+    box-shadow:
+      5px 5px 11px var(--neu-dark),
+      -5px -5px 11px var(--neu-light);
+    transition: box-shadow 0.18s var(--ease-out-quart),
+      transform 0.18s var(--ease-out-quart);
+  }
+  .neu-btn:hover {
+    box-shadow:
+      7px 7px 15px var(--neu-dark),
+      -7px -7px 15px var(--neu-light);
+    transform: translateY(-1px);
+  }
+  .neu-btn:active {
+    box-shadow:
+      inset 4px 4px 8px var(--neu-dark),
+      inset -4px -4px 8px var(--neu-light);
+    transform: translateY(1px);
+  }
+
+  /* Brand-filled pill button with soft glow */
+  .btn-brand {
+    background: linear-gradient(135deg,
+      var(--color-brand) 0%, var(--color-brand-strong) 100%);
+    color: var(--color-on-brand);
+    box-shadow:
+      5px 6px 16px oklch(0.56 0.205 285 / 0.28),
+      -3px -3px 10px var(--neu-light);
+    transition: box-shadow 0.2s var(--ease-out-quart),
+      transform 0.2s var(--ease-out-quart);
+  }
+  .btn-brand:hover {
+    box-shadow:
+      6px 9px 24px oklch(0.56 0.205 285 / 0.4),
+      -3px -3px 10px var(--neu-light);
+    transform: translateY(-2px);
+  }
+  .btn-brand:active { transform: translateY(1px); }
+
+  /* Horizontal scroll areas without a visible scrollbar */
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* Inset form field */
+  .field {
+    background: var(--color-base-2);
+    color: var(--color-ink);
+    box-shadow:
+      inset 3px 3px 6px var(--neu-dark),
+      inset -3px -3px 6px var(--neu-light);
+    transition: box-shadow 0.18s var(--ease-out-quart);
+  }
+  .field::placeholder { color: var(--color-faint); }
+  .field:focus {
+    outline: none;
+    box-shadow:
+      inset 3px 3px 6px var(--neu-dark),
+      inset -3px -3px 6px var(--neu-light),
+      0 0 0 2px var(--color-brand-soft);
+  }
+}
+
+/* Entrance + ambient motion */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+@keyframes grow-bar {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.animate-rise {
+  opacity: 0;
+  animation: rise-in 0.7s var(--ease-out-quart) forwards;
+}
+.animate-float { animation: float-y 5s ease-in-out infinite; }
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes drawer-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes drawer-in-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.drawer-backdrop { animation: fade-in 0.2s ease forwards; }
+.drawer-panel { animation: drawer-in-up 0.32s var(--ease-out-quart) forwards; }
+@media (min-width: 640px) {
+  .drawer-panel { animation: drawer-in-right 0.32s var(--ease-out-quart) forwards; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
