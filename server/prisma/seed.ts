@@ -1,5 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+
+// `npm run db:seed:prod` passes --prod → load .env.production (your Neon URL);
+// otherwise load the normal .env (local database). override so the file wins.
+dotenv.config({
+  path: process.argv.includes("--prod") ? ".env.production" : ".env",
+  override: true,
+});
 
 const prisma = new PrismaClient();
 
