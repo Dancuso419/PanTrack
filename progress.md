@@ -3,7 +3,7 @@
 > Update this file after every meaningful unit of work. Keep it honest: only mark ✅ when verified running, not just written.
 > Legend: ✅ done · 🚧 in progress · ⬜ not started · ⛔ blocked
 
-**Last updated:** 2026-07-17
+**Last updated:** 2026-07-19
 
 ---
 
@@ -64,7 +64,7 @@ Full MVP codebase scaffolded and builds clean. Backend (Express + Prisma) and fr
 - ✅ Zod validation wired on all forms
 - ⬜ Unit + integration tests (TRD §15)
 - ✅ Responsive pass (mobile/tablet/desktop) — verified via headless screenshots at 390px + 1440px; no horizontal bleed
-- ⬜ Deploy: Vercel (client) + Render (server) + Neon (DB)
+- ✅ Deploy: **single Render web service** (Express serves the React build) + Neon (DB). Live and verified: register/login work. _Note: switched from split frontend/backend to single-origin — see change log 2026-07-19._
 
 ---
 
@@ -84,6 +84,7 @@ Full MVP codebase scaffolded and builds clean. Backend (Express + Prisma) and fr
 | 2026-07-18 | Offline-ready: local Postgres + self-hosted fonts | Installed/connected local PostgreSQL; `prisma migrate dev` created DB + tables; wrote `prisma/seed.ts` (demo@pantrack.app / password123 with realistic income/expenses/budgets). Self-hosted Satoshi + Clash Display woff2 in `client/src/assets/fonts` (removed Fontshare CDN) so fonts work offline. Verified end-to-end: login → dashboard returns live seeded data. |
 | 2026-07-18 | Full UI redesign — soft neumorphic hybrid (impeccable skill) | Palette + tokens extracted from "Dash Ref" (violet primary, lavender base) into Tailwind v4 `@theme`; neumorphic utility layer (raised/inset/btn/field) in index.css; Manrope font (Plus Jakarta Sans is on the reflex-reject list); added lucide-react icons + Logo/CategoryIcon/AuthBrandPanel components + currency formatter. New public landing page at `/` (hero from "Pantrack hero" ref, self-contained product preview). Redesigned MainLayout shell, Dashboard, Login/Register, 8-step Onboarding, Income, Expenses, Categories, Budget, Analytics, Reports. Also fixed hardcoded ₦ (now respects user currency). PRODUCT.md written. Client typecheck + prod build pass clean. |
 | 2026-07-18 | Doc-alignment audit + fixes | Dashboard now returns merged 5 recent txns (was raw array — broke Recent Transactions); JWT honors `JWT_EXPIRES_IN`; login route Zod-validated; category delete blocks when in use; `@@index([userId])` on Income/Expense/Category/Budget; analytics monthly trend rewritten without raw SQL (TRD §10); "Skip onboarding" now marks user onboarded; CLAUDE.md §5/§6 reconciled to cookie auth + CSRF note. Both builds pass clean. |
+| 2026-07-19 | Deploy fixes: single-origin on Render (registration failing) | "Registration failed" in prod was a chain of deploy issues, not a code bug (account was actually being created). Root cause: frontend + backend were on two different `*.onrender.com` subdomains, which the Public Suffix List treats as separate sites → auth cookie was third-party → browser blocked it → `/auth/me` 401'd right after register. Collapsed to **one origin**: Express now serves the React build (`server/public`, built by `client/vite.config.ts` `outDir`) with a `*`-not-`/api` SPA fallback; cookie reverted to `SameSite=Lax` + Secure; Helmet CSP disabled so it doesn't block the Vite bundle; client `baseURL` hardcoded to relative `/api` (dropped `VITE_API_URL`); `.npmrc include=dev` in client+server so Render installs devDeps under `NODE_ENV=production`; added `render.yaml` blueprint. Also (landing) fixed nav pill scrolling away (`overflow-x-hidden` on root broke `sticky`) + trimmed footer to brand only; password show/hide eye toggle on Login/Register. Verified end-to-end locally and live. |
 
 ---
 
@@ -91,3 +92,10 @@ Full MVP codebase scaffolded and builds clean. Backend (Express + Prisma) and fr
 
 - **2026-07-17 — Auth token storage:** Use **httpOnly cookie** (`SameSite=Strict`, `Secure` in prod, 7-day expiry) instead of Bearer + localStorage. Reason: finance app; cookie prevents XSS token theft. Cost: add CSRF protection + Axios `withCredentials: true`. _Settled — do not revisit._
 - **2026-07-17 — Onboarding income/budget storage:** Store on the **User table** (`monthlyIncome`, `monthlyBudget`, `profileType`, `onboarded`), not a new table. Reason: 1:1 with user, MVP-minimal. Actual Income/Budget records stay in their own tables. _Settled — do not revisit._
+
+## ⚠️ Security follow-ups (before public launch)
+
+Deferred during the single-origin deploy (change log 2026-07-19). Fine for MVP/demo, **must** be addressed before this is truly public:
+
+- ⬜ **CSRF protection.** Cookie is now `SameSite=Lax` (was `Strict`), which still blocks cross-site POSTs but is weaker. Add a token-based CSRF guard on state-changing routes (per CLAUDE.md §6). Since the app is single-origin, the double-submit-cookie pattern is straightforward.
+- ⬜ **Content Security Policy.** Helmet's CSP is currently **disabled** (`contentSecurityPolicy: false` in `server.ts`) so it wouldn't block the served Vite bundle. Re-enable with a tuned policy (`script-src`/`style-src`/`connect-src` for the built assets + API origin) — `ponytail:` comment marks the spot.
